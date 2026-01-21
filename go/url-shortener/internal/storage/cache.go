@@ -1,10 +1,8 @@
 package storage
 
 import (
-	"context"
+	"database/sql"
 	"time"
-
-	"github.com/go-redis/redis/v8"
 )
 
 // Cache defines the interface for caching operations
@@ -14,39 +12,68 @@ type Cache interface {
 	Delete(key string) error
 }
 
-// RedisCache implements the Cache interface using Redis
-type RedisCache struct {
-	client *redis.Client
-	ctx    context.Context
+// SQLiteCache implements the Cache interface using SQLite
+type SQLiteCache struct {
+	db *sql.DB
 }
 
-// NewRedisCache creates a new Redis cache instance
-func NewRedisCache(addr string) *RedisCache {
-	client := redis.NewClient(&redis.Options{
-		Addr: addr,
-	})
-
-	return &RedisCache{
-		client: client,
-		ctx:    context.Background(),
+// NewSQLiteCache creates a new SQLite cache instance
+func NewSQLiteCache(db *sql.DB) (*SQLiteCache, error) {
+	// Create cache table
+	_, err := db.Exec(`
+		CREATE TABLE IF NOT EXISTS cache (
+			key TEXT PRIMARY KEY,
+			value TEXT NOT NULL,
+			expires_at INTEGER NOT NULL
+		)
+	`)
+	if err != nil {
+		return nil, err
 	}
+
+	// Create index on expires_at for cleanup
+	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_cache_expires ON cache(expires_at)`)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SQLiteCache{db: db}, nil
 }
 
 // Get retrieves a value from the cache
-func (c *RedisCache) Get(key string) (string, error) {
-	val, err := c.client.Get(c.ctx, key).Result()
-	if err == redis.Nil {
-		return "", nil // Key does not exist
+func (c *SQLiteCache) Get(key string) (string, error) {
+	// Clean expired entries first
+	c.cleanup()
+
+	var value string
+	err := c.db.QueryRow(
+		"SELECT value FROM cache WHERE key = ? AND expires_at > ?",
+		key, time.Now().Unix(),
+	).Scan(&value)
+
+	if err == sql.ErrNoRows {
+		return "", nil // Key does not exist or expired
 	}
-	return val, err
+	return value, err
 }
 
 // Set stores a value in the cache with expiration
-func (c *RedisCache) Set(key string, value string, expiration time.Duration) error {
-	return c.client.Set(c.ctx, key, value, expiration).Err()
+func (c *SQLiteCache) Set(key string, value string, expiration time.Duration) error {
+	expiresAt := time.Now().Add(expiration).Unix()
+	_, err := c.db.Exec(
+		"INSERT OR REPLACE INTO cache (key, value, expires_at) VALUES (?, ?, ?)",
+		key, value, expiresAt,
+	)
+	return err
 }
 
 // Delete removes a key from the cache
-func (c *RedisCache) Delete(key string) error {
-	return c.client.Del(c.ctx, key).Err()
+func (c *SQLiteCache) Delete(key string) error {
+	_, err := c.db.Exec("DELETE FROM cache WHERE key = ?", key)
+	return err
+}
+
+// cleanup removes expired entries
+func (c *SQLiteCache) cleanup() {
+	c.db.Exec("DELETE FROM cache WHERE expires_at <= ?", time.Now().Unix())
 }

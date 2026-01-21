@@ -1,17 +1,15 @@
-.PHONY: help run-url run-blog run-weather run-scraper setup-go setup-python clean
+.PHONY: help run-url run-weather setup-go setup-python clean
 
 help:
 	@echo "Convert Framework Workshop - Quick Commands"
 	@echo ""
 	@echo "Running Applications:"
-	@echo "  make run-url       Run Go URL Shortener (requires Redis)"
-	@echo "  make run-blog      Run Go Blog API"
+	@echo "  make run-url       Run Go URL Shortener"
 	@echo "  make run-weather   Run Python Weather CLI (interactive)"
-	@echo "  make run-scraper   Run Python Web Scraper (interactive)"
 	@echo ""
 	@echo "Setup:"
-	@echo "  make setup-go      Install Go dependencies for all Go apps"
-	@echo "  make setup-python  Setup Python virtual environments"
+	@echo "  make setup-go      Install Go dependencies"
+	@echo "  make setup-python  Setup Python virtual environment"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  make clean         Clean build artifacts and caches"
@@ -20,12 +18,7 @@ help:
 # Go Applications
 run-url:
 	@echo "🚀 Starting URL Shortener..."
-	@echo "⚠️  Make sure Redis is running: redis-server"
-	cd go/url-shortener && go run cmd/server/main.go
-
-run-blog:
-	@echo "🚀 Starting Blog API..."
-	cd go/blog-api && go run cmd/server/main.go
+	@cd go/url-shortener && go mod tidy && go run cmd/server/main.go
 
 # Python Applications  
 run-weather:
@@ -43,12 +36,6 @@ run-weather:
 		. venv/bin/activate && pip install -r requirements.txt; \
 	fi && \
 	. venv/bin/activate && python -m weather_cli.cli --help
-
-run-scraper:
-	@echo "🕷️  Web Scraper Tool"
-	@echo ""
-	@echo "Example commands:"
-	@echo "  python -m web_scraper.cli -c examples/hacker_news.json -o results.json"
 	@echo "  python -m web_scraper.cli -c examples/hacker_news.json -o results.csv --format csv"
 	@echo ""
 	@cd python/web-scraper && \
@@ -62,15 +49,13 @@ run-scraper:
 # Setup
 setup-go:
 	@echo "📦 Installing Go dependencies..."
-	cd go/url-shortener && go mod download
-	cd go/blog-api && go mod download
+	cd go/url-shortener && go mod tidy
 	@echo "✅ Go dependencies installed"
 
 setup-python:
-	@echo "🐍 Setting up Python environments..."
+	@echo "🐍 Setting up Python environment..."
 	cd python/weather-cli && python -m venv venv && . venv/bin/activate && pip install -r requirements.txt
-	cd python/web-scraper && python -m venv venv && . venv/bin/activate && pip install -r requirements.txt
-	@echo "✅ Python environments ready"
+	@echo "✅ Python environment ready"
 	@echo ""
 	@echo "⚠️  Don't forget to configure API keys:"
 	@echo "  cp python/weather-cli/.env.example python/weather-cli/.env"

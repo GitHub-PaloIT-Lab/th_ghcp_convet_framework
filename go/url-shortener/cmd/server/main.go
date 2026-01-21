@@ -20,8 +20,11 @@ func main() {
 	}
 	defer store.Close()
 
-	// Initialize Redis cache
-	cache := storage.NewRedisCache(getEnv("REDIS_ADDR", "localhost:6379"))
+	// Initialize SQLite cache (same database)
+	cache, err := storage.NewSQLiteCache(store.DB())
+	if err != nil {
+		log.Fatal("Failed to initialize cache:", err)
+	}
 
 	// Initialize service
 	urlService := service.NewURLService(cache, store)

@@ -8,12 +8,7 @@ A RESTful API for shortening URLs with analytics tracking, built with Go, Chi ro
 # 1. Install dependencies
 go mod download
 
-# 2. Start Redis (required)
-redis-server
-# OR with Docker:
-docker run -d -p 6379:6379 redis
-
-# 3. Run the server
+# 2. Run the server (no Redis needed!)
 go run cmd/server/main.go
 # → Server starts at http://localhost:8080
 ```
@@ -48,16 +43,16 @@ curl http://localhost:8080/api/urls \
 - ✅ Track click analytics (count, timestamps, referrers)
 - ✅ List all shortened URLs for a user
 - ✅ Delete shortened URLs
-- ✅ In-memory cache with Redis for fast lookups
+- ✅ SQLite-based caching for fast lookups
 - ✅ API key authentication
+- ✅ No external dependencies (Redis-free!)
 
 ## Tech Stack
 
 - **Go 1.21+**
 - **Chi** - HTTP router
-- **Redis** - Caching layer
-- **SQLite** - Database
-- **go-redis** - Redis client
+- **SQLite** - Database & caching
+- **mattn/go-sqlite3** - SQLite driver
 
 ## Project Structure
 

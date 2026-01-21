@@ -9,14 +9,13 @@
 git clone <your-repo-url>
 cd convert-framework
 
-# 2. Try a Go application
+# 2. Try the Go application
 cd go/url-shortener
-go mod download
-redis-server &  # Start Redis in background
+go mod tidy
 go run cmd/server/main.go
 # → Server at http://localhost:8080
 
-# 3. Try a Python application
+# 3. Try the Python application
 cd ../../python/weather-cli
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
@@ -27,16 +26,13 @@ python -m weather_cli.cli current "Bangkok"
 **📱 Quick Commands:**
 ```bash
 make run-url       # Go URL Shortener
-make run-blog      # Go Blog API  
 make run-weather   # Python Weather CLI
-make run-scraper   # Python Web Scraper
+make help          # See all commands
 ```
 
 **📖 App-Specific Guides:**
-- [go/url-shortener/README.md](go/url-shortener/README.md)
-- [go/blog-api/README.md](go/blog-api/README.md)
-- [python/weather-cli/README.md](python/weather-cli/README.md)
-- [python/web-scraper/README.md](python/web-scraper/README.md)
+- [go/url-shortener/README.md](go/url-shortener/README.md) - REST API with Chi & SQLite
+- [python/weather-cli/README.md](python/weather-cli/README.md) - CLI tool with Click & APIs
 
 ---
 
@@ -55,33 +51,47 @@ make run-scraper   # Python Web Scraper
 
 ## Applications
 
-### Go Applications (แปลงเป็น Python)
+### 1. URL Shortener API (Go → Python) 🔗
 
-1. **URL Shortener API** 🔗
-   - REST API สำหรับย่อ URL พร้อม analytics
-   - Chi router + Redis + SQLite
-   - → Python/FastAPI
-   - Complexity: ⭐⭐⭐ (Medium, 2-3 hours)
+**Source:** Go with Chi router + SQLite  
+**Target:** Python with FastAPI + SQLAlchemy
 
-2. **Blog REST API** 📝
-   - Blog platform พร้อม posts, comments, tags
-   - Gin + PostgreSQL + JWT
-   - → Python/Django REST Framework
-   - Complexity: ⭐⭐⭐⭐ (High, 3-4 hours)
+**Features:**
+- ✅ Shorten URLs with custom short codes
+- ✅ Redirect tracking with analytics
+- ✅ SQLite-based caching for performance
+- ✅ API key authentication
+- ✅ RESTful API design
 
-### Python Applications (แปลงเป็น Go)
+**Complexity:** ⭐⭐⭐ (Medium, 2-3 hours)
 
-3. **Weather CLI Tool** 🌤️
-   - CLI สำหรับดูสภาพอากาศจากหลาย APIs
-   - Click + Requests + SQLite
-   - → Go/Cobra
-   - Complexity: ⭐⭐⭐ (Medium, 2-3 hours)
+**Learn:**
+- Go structs → Pydantic models
+- Chi router → FastAPI routes
+- Go error handling → Python exceptions
+- SQLite operations in both languages
 
-4. **Web Scraper** 🕷️
-   - Configurable scraper พร้อม data export
-   - BeautifulSoup4 + Requests + Pandas
-   - → Go/Colly + goquery
-   - Complexity: ⭐⭐⭐⭐ (High, 3-4 hours)
+---
+
+### 2. Weather CLI Tool (Python → Go) 🌤️
+
+**Source:** Python with Click + Multiple APIs  
+**Target:** Go with Cobra CLI
+
+**Features:**
+- ✅ Fetch weather from multiple sources
+- ✅ Multiple output formats (table, JSON, simple)
+- ✅ Favorite locations with SQLite
+- ✅ Weather comparison across cities
+- ✅ Caching to reduce API calls
+
+**Complexity:** ⭐⭐⭐ (Medium, 2-3 hours)
+
+**Learn:**
+- Click CLI → Cobra commands
+- Python async → Go goroutines
+- Python classes → Go structs with methods
+- HTTP clients in both languages
 
 ## Project Structure
 
@@ -89,15 +99,20 @@ make run-scraper   # Python Web Scraper
 convert-framework/
 ├── .github/
 │   └── copilot-instructions.md    # Copilot configuration
-├── go/                             # Go applications
-│   ├── url-shortener/             # URL Shortener (to be created)
-│   └── blog-api/                  # Blog API (to be created)
-├── python/                         # Python applications
-│   ├── weather-cli/               # Weather CLI (to be created)
-│   └── web-scraper/               # Web Scraper (to be created)
+├── go/
+│   └── url-shortener/             # Go URL Shortener (source)
+│       ├── cmd/server/            # Entry point
+│       ├── internal/              # Application logic
+│       └── README.md              # Quick start guide
+├── python/
+│   └── weather-cli/               # Python Weather CLI (source)
+│       ├── weather_cli/           # Package code
+│       ├── requirements.txt       # Dependencies
+│       └── README.md              # Quick start guide
 ├── docs/                           # Workshop documentation
+│   ├── GETTING_STARTED.md         # Setup guide
 │   ├── IMPLEMENTATION_PLAN.md     # Detailed implementation guide
-│   ├── APPLICATION_SELECTION.md   # Help choosing an application
+│   ├── COPILOT_GUIDE.md           # AI techniques & prompts
 │   ├── COPILOT_GUIDE.md          # Copilot techniques & prompts
 │   └── WORKSHOP_PROGRESS.md      # Track your progress
 └── README.md                       # This file
@@ -113,20 +128,19 @@ convert-framework/
 - Git installed
 - Basic understanding of both Go and Python
 
-**For Go Applications:**
+**For Go Application:**
 - Go 1.21+ installed
-- PostgreSQL (for Blog API)
-- Redis (for URL Shortener)
 
-**For Python Applications:**
+**For Python Application:**
 - Python 3.11+ installed
 - pip and virtualenv
+- Free API keys (OpenWeatherMap, WeatherAPI.com)
 
-### Installation
+### Quick Setup
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/convert-framework.git
+   git clone <your-repo-url>
    cd convert-framework
    ```
 

@@ -193,3 +193,8 @@ func (s *SQLiteStore) GetRecentClicks(shortCode string, limit int) ([]models.Cli
 func (s *SQLiteStore) Close() error {
 	return s.db.Close()
 }
+
+// DB returns the underlying database connection
+func (s *SQLiteStore) DB() *sql.DB {
+	return s.db
+}
