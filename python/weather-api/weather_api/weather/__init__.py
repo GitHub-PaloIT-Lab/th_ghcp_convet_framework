@@ -2,8 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 import requests
-from weather_cli.models import WeatherData
-
+from weather_api.models import WeatherData
 
 class WeatherAPIClient(ABC):
     """Base class for weather API clients"""

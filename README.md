@@ -51,12 +51,14 @@ make run-url
 # Setup Python environment
 make setup-python
 
-# Configure API keys for Weather CLI
-cp python/weather-cli/.env.example python/weather-cli/.env
+# Configure API keys for Weather API
+cp python/weather-api/.env.example python/weather-api/.env
 # Edit .env and add your API keys
 
-# Run Weather CLI
+# Run Weather API
 make run-weather
+# API will be available at http://localhost:8000
+# Documentation at http://localhost:8000/docs
 ```
 
 ## Detailed Setup
@@ -74,21 +76,21 @@ make run-weather
 
 2. **Test it**
    ```bash
-   curl -X POST http://localhost:8080/api/shorten \
+   curl -X POST http://localhost:8080/api/urls \
      -H "X-API-Key: test-key" \
      -H "Content-Type: application/json" \
-     -d '{"url": "https://github.com"}'
+     -d '{"original_url": "https://github.com"}'
    ```
 
 ### Python Application Setup \
 ### Python Application Setup
 
-#### Weather CLI
+#### Weather API
 
 1. **Setup environment**
    ```bash
-   cd python/weather-cli
-   python -m venv venv
+   cd python/weather-api
+   python3 -m venv venv  # Windows: python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
    pip install -r requirements.txt
    ```
@@ -103,10 +105,37 @@ make run-weather
    # Edit .env and add your API keys
    ```
 
-4. **Use it**
+4. **Run it**
    ```bash
-   python -m weather_cli.cli current "Bangkok"
-   python -m weather_cli.cli forecast "Tokyo" --days 5
+   python main.py
+   # Or with auto-reload: uvicorn main:app --reload
+   ```
+
+5. **Test it**
+   ```bash
+   # Open API Documentation in browser
+   open http://localhost:8000/docs  # macOS
+   # Or visit: http://localhost:8000/docs
+   
+   # Get current weather
+   curl http://localhost:8000/weather/current/Bangkok
+   
+   # Get forecast
+   curl "http://localhost:8000/weather/forecast/Tokyo?days=5"
+   
+   # Compare multiple cities
+   curl -X POST http://localhost:8000/weather/compare \
+     -H "Content-Type: application/json" \
+     -d '{"locations": ["Bangkok", "Singapore", "Tokyo"]}'
+   
+   # Manage favorites
+   curl http://localhost:8000/favorites
+   curl -X POST http://localhost:8000/favorites/Bangkok
+   curl http://localhost:8000/favorites/Bangkok
+   curl -X DELETE http://localhost:8000/favorites/Bangkok
+   
+   # Health check
+   curl http://localhost:8000/health
    ```
 
 ## Verify Your Setup
@@ -120,7 +149,8 @@ go version  # Should show 1.21 or higher
 ### Check Python Installation
 
 ```bash
-python --version  # Should show 3.11 or higher
+python3 --version  # Should show 3.11 or higher
+# Windows users: python --version
 ```
 
 ### Check GitHub Copilot
@@ -129,6 +159,104 @@ python --version  # Should show 3.11 or higher
 2. Type a comment: `// Create a function that...`
 3. Wait for Copilot suggestion (gray text)
 4. If you see suggestions, Copilot is working!
+
+## Usage Examples
+
+### URL Shortener API (Go)
+
+```bash
+# Start the server
+make run-url
+# Server runs on http://localhost:8080
+
+# Shorten a URL
+curl -X POST http://localhost:8080/api/urls \
+  -H "X-API-Key: test-key" \
+  -H "Content-Type: application/json" \
+  -d '{"original_url": "https://github.com/features"}'
+
+# Response:
+# {"short_code":"abc123","original_url":"https://github.com/features","created_at":"2026-01-21T..."}
+
+# Use the shortened URL
+curl -L http://localhost:8080/abc123
+# Redirects to https://github.com/features
+
+# List all shortened URLs
+curl http://localhost:8080/api/urls \
+  -H "X-API-Key: test-key"
+
+# Get analytics
+curl http://localhost:8080/api/analytics/abc123 \
+  -H "X-API-Key: test-key"
+
+# Response:
+# {"short_code":"abc123","clicks":1,"created_at":"...","last_accessed":"..."}
+
+# Delete a shortened URL
+curl -X DELETE http://localhost:8080/api/urls/abc123 \
+  -H "X-API-Key: test-key"
+```
+
+### Weather API (Python)
+
+```bash
+# Start the server
+make run-weather
+# Server runs on http://localhost:8000
+
+# Get current weather for a city
+curl http://localhost:8000/weather/current/Bangkok
+
+# Response:
+# {
+#   "location": "Bangkok",
+#   "avg_temperature": 32.5,
+#   "avg_humidity": 70.0,
+#   "consensus_description": "Partly cloudy",
+#   "sources": [...]
+# }
+
+# Get 5-day forecast
+curl "http://localhost:8000/weather/forecast/Tokyo?days=5"
+
+# Compare weather across multiple cities
+curl -X POST http://localhost:8000/weather/compare \
+  -H "Content-Type: application/json" \
+  -d '{"locations": ["Bangkok", "Singapore", "Tokyo"]}'
+
+# Add a city to favorites
+curl -X POST http://localhost:8000/favorites/Bangkok
+
+# List all favorite cities
+curl http://localhost:8000/favorites
+
+# Remove from favorites
+curl -X DELETE http://localhost:8000/favorites/Bangkok
+
+# View interactive API docs
+open http://localhost:8000/docs
+```
+
+## Application Features
+
+### URL Shortener (Go)
+- ✅ Create short URLs with custom or auto-generated codes
+- ✅ Redirect to original URLs
+- ✅ Track click analytics
+- ✅ API key authentication
+- ✅ SQLite storage
+- ✅ In-memory caching
+- ✅ RESTful JSON API
+
+### Weather API (Python)
+- ✅ Get current weather from WeatherAPI.com
+- ✅ Get weather forecasts (1-7 days)
+- ✅ Compare weather across multiple cities
+- ✅ Manage favorite locations
+- ✅ SQLite caching (optional)
+- ✅ Interactive API documentation (Swagger UI)
+- ✅ RESTful JSON API with FastAPI
 
 ## Troubleshooting
 

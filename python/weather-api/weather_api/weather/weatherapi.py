@@ -1,7 +1,7 @@
 """WeatherAPI.com client"""
 from datetime import datetime
-from weather_cli.weather import WeatherAPIClient
-from weather_cli.models import WeatherData
+from weather_api.weather import WeatherAPIClient
+from weather_api.models import WeatherData
 
 
 class WeatherAPIClient(WeatherAPIClient):

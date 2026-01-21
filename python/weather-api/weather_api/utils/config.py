@@ -12,6 +12,5 @@ def load_config() -> dict:
         load_dotenv(env_path)
     
     return {
-        'OPENWEATHER_API_KEY': os.getenv('OPENWEATHER_API_KEY'),
-        'WEATHERAPI_KEY': os.getenv('WEATHERAPI_KEY'),
+        'weatherapi_key': os.getenv('WEATHERAPI_KEY'),
     }

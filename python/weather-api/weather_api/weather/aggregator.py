@@ -1,8 +1,8 @@
 """Weather data aggregator"""
 from typing import List, Optional
-from weather_cli.weather import WeatherAPIClient
-from weather_cli.models import WeatherData, AggregatedWeather
-from weather_cli.storage.cache import WeatherCache
+from weather_api.weather import WeatherAPIClient
+from weather_api.models import WeatherData, AggregatedWeather
+from weather_api.storage.cache import WeatherCache
 from collections import Counter
 
 
@@ -63,7 +63,7 @@ class WeatherAggregator:
         return AggregatedWeather(
             location=data_list[0].location,
             avg_temperature=round(avg_temp, 1),
-            avg_humidity=round(avg_humidity),
+            avg_humidity=round(avg_humidity, 1),
             sources=data_list,
             consensus_description=consensus_desc
         )

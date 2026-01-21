@@ -1,11 +1,14 @@
 .PHONY: help run-url run-weather setup-go setup-python clean
 
+# Detect Python command (python3 on Unix/macOS, python on Windows)
+PYTHON := $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null || echo python)
+
 help:
 	@echo "Convert Framework Workshop - Quick Commands"
 	@echo ""
 	@echo "Running Applications:"
-	@echo "  make run-url       Run Go URL Shortener"
-	@echo "  make run-weather   Run Python Weather CLI (interactive)"
+	@echo "  make run-url       Run Go URL Shortener API"
+	@echo "  make run-weather   Run Python Weather API"
 	@echo ""
 	@echo "Setup:"
 	@echo "  make setup-go      Install Go dependencies"
@@ -22,29 +25,9 @@ run-url:
 
 # Python Applications  
 run-weather:
-	@echo "🌤️  Weather CLI Tool"
-	@echo ""
-	@echo "Available commands:"
-	@echo "  python -m weather_cli.cli current \"Bangkok\""
-	@echo "  python -m weather_cli.cli forecast \"Tokyo\" --days 5"
-	@echo "  python -m weather_cli.cli compare \"Bangkok\" \"Singapore\""
-	@echo ""
-	@cd python/weather-cli && \
-	if [ ! -d "venv" ]; then \
-		echo "Setting up virtual environment..."; \
-		python -m venv venv; \
-		. venv/bin/activate && pip install -r requirements.txt; \
-	fi && \
-	. venv/bin/activate && python -m weather_cli.cli --help
-	@echo "  python -m web_scraper.cli -c examples/hacker_news.json -o results.csv --format csv"
-	@echo ""
-	@cd python/web-scraper && \
-	if [ ! -d "venv" ]; then \
-		echo "Setting up virtual environment..."; \
-		python -m venv venv; \
-		. venv/bin/activate && pip install -r requirements.txt; \
-	fi && \
-	. venv/bin/activate && python -m web_scraper.cli --help
+	@echo "🌤️  Starting Weather API at http://localhost:8000"
+	@echo "📚 Documentation: http://localhost:8000/docs"
+	@cd python/weather-api && venv/bin/python main.py
 
 # Setup
 setup-go:
@@ -54,11 +37,11 @@ setup-go:
 
 setup-python:
 	@echo "🐍 Setting up Python environment..."
-	cd python/weather-cli && python -m venv venv && . venv/bin/activate && pip install -r requirements.txt
+	cd python/weather-api && $(PYTHON) -m venv venv && . venv/bin/activate && pip install -r requirements.txt
 	@echo "✅ Python environment ready"
 	@echo ""
 	@echo "⚠️  Don't forget to configure API keys:"
-	@echo "  cp python/weather-cli/.env.example python/weather-cli/.env"
+	@echo "  cp python/weather-api/.env.example python/weather-api/.env"
 	@echo "  # Edit .env and add your API keys"
 
 # Cleanup
