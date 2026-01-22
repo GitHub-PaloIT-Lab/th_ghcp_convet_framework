@@ -1,0 +1,73 @@
+spring:
+  profiles:
+    active: test
+  
+  # H2 In-Memory Database for Testing
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+  
+  # H2 Configuration
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # Redis Test Configuration (via TestContainers)
+  redis:
+    host: localhost
+    port: 6379
+    password: # No password in tests
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # Recreate schema for each test
+    show-sql: false
+    database-platform: org.hibernate.dialect.H2Dialect
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 10
+
+# Logging Configuration (minimal for tests)
+logging:
+  level:
+    root: WARN
+    com.weatherapi: INFO
+    org.springframework.test: INFO
+    org.hibernate: WARN
+
+# Actuator Configuration (limited in tests)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+# API Configuration (for testing with WireMock)
+api:
+  weatherapi:
+    enabled: true
+    timeout: 5000 # Shorter timeout for tests
+    base-url: http://localhost:8081
+    key: test-key
+  
+  openweather:
+    enabled: true
+    timeout: 5000 # Shorter timeout for tests
+    base-url: http://localhost:8082
+    key: test-key
+
+# Test Server Configuration
+server:
+  port: 8080 # Random port assigned by @SpringBootTest
