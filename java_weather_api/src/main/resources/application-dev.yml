@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active: dev
-  
   # PostgreSQL Development Configuration
   datasource:
     url: jdbc:postgresql://localhost:5432/weather_api_db
